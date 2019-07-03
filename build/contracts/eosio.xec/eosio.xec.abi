@@ -1,0 +1,184 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.1",
+    "types": [],
+    "structs": [
+        {
+            "name": "pair_string_uint8",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "permission",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc",
+                    "type": "name"
+                },
+                {
+                    "name": "createacc",
+                    "type": "uint8"
+                },
+                {
+                    "name": "vote",
+                    "type": "uint8"
+                },
+                {
+                    "name": "regprod",
+                    "type": "uint8"
+                },
+                {
+                    "name": "regproxy",
+                    "type": "uint8"
+                },
+                {
+                    "name": "setcontract",
+                    "type": "uint8"
+                },
+                {
+                    "name": "namebids",
+                    "type": "uint8"
+                },
+                {
+                    "name": "rex",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "remove",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "reqperm",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc",
+                    "type": "name"
+                },
+                {
+                    "name": "permission",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "setperm",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc",
+                    "type": "name"
+                },
+                {
+                    "name": "perms",
+                    "type": "pair_string_uint8[]"
+                }
+            ]
+        },
+        {
+            "name": "setperm2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc",
+                    "type": "name"
+                },
+                {
+                    "name": "perms",
+                    "type": "uint8[]"
+                }
+            ]
+        },
+        {
+            "name": "setuserinfo",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc",
+                    "type": "name"
+                },
+                {
+                    "name": "data",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "userinfo",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc",
+                    "type": "name"
+                },
+                {
+                    "name": "data",
+                    "type": "string"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "remove",
+            "type": "remove",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "reqperm",
+            "type": "reqperm",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setperm",
+            "type": "setperm",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setperm2",
+            "type": "setperm2",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setuserinfo",
+            "type": "setuserinfo",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "permissions",
+            "type": "permission",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "usersinfo",
+            "type": "userinfo",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": []
+}
