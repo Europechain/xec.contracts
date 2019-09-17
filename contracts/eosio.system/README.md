@@ -1,4 +1,4 @@
-eosio.system
+xec eosio.system
 ----------
 
 This contract provides multiple functionalities:

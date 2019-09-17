@@ -16,7 +16,6 @@
 #include <string>
 #include <type_traits>
 
-
 #ifdef CHANNEL_RAM_AND_NAMEBID_FEES_TO_REX
 #undef CHANNEL_RAM_AND_NAMEBID_FEES_TO_REX
 #endif
@@ -69,13 +68,13 @@ namespace eosiosystem {
    static constexpr int64_t  min_activated_stake   = 150'000'000'0000;
    static constexpr int64_t  ram_gift_bytes        = 1400;
    static constexpr int64_t  min_pervote_daily_pay = 100'0000;
-
-   static constexpr double   continuous_rate       = 0.00993;          // XEC 1% annual rate  //       5%=0.04879;
-   static constexpr int64_t  inflation_pay_factor  = 1;                // old was  5 - 20% of the inflation  //XEC
-   static constexpr int64_t  votepay_factor        = 1;                // old was 4 - 25% of the producer pay  //XEC
-
    static constexpr uint32_t refund_delay_sec      = 3 * seconds_per_day;
 
+   static constexpr int64_t  inflation_precision           = 100;     // 2 decimals
+   static constexpr int64_t  default_annual_rate           = 100;     // XEC was 500 = 5% annual rate, CHANGED TO 100 = 1%
+   static constexpr int64_t  pay_factor_precision          = 10000;
+   static constexpr int64_t  default_inflation_pay_factor  = 10000;   // XEC was 50000 changed to 10000  = 100% //producers pay share = 10000 / 50000 = 20% of the inflation
+   static constexpr int64_t  default_votepay_factor        = 10000;   //XEC was 40000. changed to vote share to 100%   // per-block pay share = 10000 / 40000 = 25% of the producer pay
 
    /**
     *
@@ -147,7 +146,7 @@ namespace eosiosystem {
    struct [[eosio::table("global"), eosio::contract("eosio.system")]] eosio_global_state : eosio::blockchain_parameters {
       uint64_t free_ram()const { return max_ram_size - total_ram_bytes_reserved; }
 
-      uint64_t             max_ram_size = 16ll*1024 * 1024 * 1024; //XEC 64ll ->16ll   (16GB)
+      uint64_t             max_ram_size = 16ll*1024 * 1024 * 1024;  //XEC 64ll ->16ll   (16GB)
       uint64_t             total_ram_bytes_reserved = 0;
       int64_t              total_ram_stake = 0;
 
@@ -195,6 +194,18 @@ namespace eosiosystem {
       double            total_vpay_share_change_rate = 0;
 
       EOSLIB_SERIALIZE( eosio_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate) )
+   };
+
+   /**
+    * Defines new global state parameters to store inflation rate and distribution
+    */
+   struct [[eosio::table("global4"), eosio::contract("eosio.system")]] eosio_global_state4 {
+      eosio_global_state4() { }
+      double   continuous_rate;
+      int64_t  inflation_pay_factor;
+      int64_t  votepay_factor;
+
+      EOSLIB_SERIALIZE( eosio_global_state4, (continuous_rate)(inflation_pay_factor)(votepay_factor) )
    };
 
    /**
@@ -311,6 +322,10 @@ namespace eosiosystem {
     * Global state singleton added in version 1.3
     */
    typedef eosio::singleton< "global3"_n, eosio_global_state3 > global_state3_singleton;
+   /**
+    * Global state singleton added in version 1.6.x
+    */
+   typedef eosio::singleton< "global4"_n, eosio_global_state4 > global_state4_singleton;
 
    struct [[eosio::table, eosio::contract("eosio.system")]] user_resources {
       name          owner;
@@ -539,9 +554,11 @@ namespace eosiosystem {
          global_state_singleton  _global;
          global_state2_singleton _global2;
          global_state3_singleton _global3;
+         global_state4_singleton _global4;
          eosio_global_state      _gstate;
          eosio_global_state2     _gstate2;
          eosio_global_state3     _gstate3;
+         eosio_global_state4     _gstate4;
          rammarket               _rammarket;
          rex_pool_table          _rexpool;
          rex_fund_table          _rexfunds;
@@ -1235,6 +1252,42 @@ namespace eosiosystem {
          [[eosio::action]]
          void bidrefund( const name& bidder, const name& newname );
 
+         /**
+          * Set inflation action.
+          *
+          * @details Change the annual inflation rate of the core token supply and specify how
+          *          the new issued tokens will be distributed based on the following structure.
+          *
+          *    +----+                          +----------------+
+          *    +rate|               +--------->|per vote reward |
+          *    +--+-+               |          +----------------+
+          *       |            +-----+------+
+          *       |     +----->| bp rewards |
+          *       v     |      +-----+------+
+          *    +-+--+---+-+         |          +----------------+
+          *    |new tokens|         +--------->|per block reward|
+          *    +----+-----+                    +----------------+
+          *             |      +------------+
+          *             +----->|  savings   |
+          *                    +------------+
+          *
+          * @param annual_rate - Annual inflation rate of the core token supply.
+          *     (eg. For 5% Annual inflation => annual_rate=500
+          *          For 1.5% Annual inflation => annual_rate=150
+          *
+          * @param inflation_pay_factor - Inverse of the fraction of the inflation used to reward block producers.
+          *     The remaining inflation will be sent to the `eosio.saving` account.
+          *     (eg. For 20% of inflation going to block producer rewards   => inflation_pay_factor = 50000
+          *          For 100% of inflation going to block producer rewards  => inflation_pay_factor = 10000).
+          *
+          * @param votepay_factor - Inverse of the fraction of the block producer rewards to be distributed proportional to blocks produced.
+          *     The remaining rewards will be distributed proportional to votes received.
+          *     (eg. For 25% of block producer rewards going towards block pay => votepay_factor = 40000
+          *          For 75% of block producer rewards going towards block pay => votepay_factor = 13333).
+          */
+         [[eosio::action]]
+         void setinflation( int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor );
+
          using init_action = eosio::action_wrapper<"init"_n, &system_contract::init>;
          using setacctram_action = eosio::action_wrapper<"setacctram"_n, &system_contract::setacctram>;
          using setacctnet_action = eosio::action_wrapper<"setacctnet"_n, &system_contract::setacctnet>;
@@ -1279,6 +1332,7 @@ namespace eosiosystem {
          using setpriv_action = eosio::action_wrapper<"setpriv"_n, &system_contract::setpriv>;
          using setalimits_action = eosio::action_wrapper<"setalimits"_n, &system_contract::setalimits>;
          using setparams_action = eosio::action_wrapper<"setparams"_n, &system_contract::setparams>;
+         using setinflation_action = eosio::action_wrapper<"setinflation"_n, &system_contract::setinflation>;
 
          static uint8_t checkPermission(name acc, std::string permission); //XEC
       private:
@@ -1292,6 +1346,7 @@ namespace eosiosystem {
 
          //defined in eosio.system.cpp
          static eosio_global_state get_default_parameters();
+         static eosio_global_state4 get_default_inflation_parameters();
          symbol core_symbol()const;
          void update_ram_supply();
 

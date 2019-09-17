@@ -66,7 +66,6 @@ namespace eosiosystem {
       check (checkPermission(owner, "rex")==1, "Owner is not authorised to use REX");  // XEC Check Permissions
       check (checkPermission(receiver, "rex")==1, "Receiver is not authorised to use REX");  // XEC Check Permissions
 
-
       check( from_net.symbol == core_symbol() && from_cpu.symbol == core_symbol(), "asset must be core token" );
       check( (0 <= from_net.amount) && (0 <= from_cpu.amount) && (0 < from_net.amount || 0 < from_cpu.amount),
              "must unstake a positive amount to buy rex" );
@@ -108,7 +107,6 @@ namespace eosiosystem {
       require_auth( from );
 
       check (checkPermission(from, "rex")==1, "You are not authorised to use REX");  // XEC Check Permissions
-
 
       runrex(2);
 
@@ -162,7 +160,6 @@ namespace eosiosystem {
 
       check (checkPermission(owner, "rex")==1, "You are not authorised to use REX");  // XEC Check Permissions
 
-
       auto itr = _rexorders.require_find( owner.value, "no sellrex order is scheduled" );
       check( itr->is_open, "sellrex order has been filled and cannot be canceled" );
       _rexorders.erase( itr );
@@ -173,7 +170,6 @@ namespace eosiosystem {
       require_auth( from );
 
       check (checkPermission(from, "rex")==1, "You are not authorised to use REX");  // XEC Check Permissions
-
 
       rex_cpu_loan_table cpu_loans( get_self(), get_self().value );
       int64_t rented_tokens = rent_rex( cpu_loans, from, receiver, loan_payment, loan_fund );
@@ -194,6 +190,8 @@ namespace eosiosystem {
    void system_contract::fundcpuloan( const name& from, uint64_t loan_num, const asset& payment )
    {
       require_auth( from );
+
+      check (checkPermission(from, "rex")==1, "You are not authorised to use REX");  // XEC Check Permissions
 
       rex_cpu_loan_table cpu_loans( get_self(), get_self().value );
       fund_rex_loan( cpu_loans, from, loan_num, payment  );

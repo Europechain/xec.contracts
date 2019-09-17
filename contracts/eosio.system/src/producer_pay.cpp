@@ -86,30 +86,38 @@ namespace eosiosystem {
       const auto usecs_since_last_fill = (ct - _gstate.last_pervote_bucket_fill).count();
 
       if( usecs_since_last_fill > 0 && _gstate.last_pervote_bucket_fill > time_point() ) {
-         auto new_tokens = static_cast<int64_t>( (continuous_rate * double(token_supply.amount) * double(usecs_since_last_fill)) / double(useconds_per_year) );
+         int64_t new_tokens = (_gstate4.continuous_rate * double(token_supply.amount) * double(usecs_since_last_fill)) / double(useconds_per_year);
 
          // XEC Inflation
          auto to_per_vote_pay  = new_tokens;
 
-
          // XEC Inflation
-         // auto to_producers     = new_tokens / inflation_pay_factor;
-         // auto to_savings       = new_tokens - to_producers;
-         // auto to_per_block_pay = to_producers / votepay_factor;
-         // auto to_per_vote_pay  = to_producers - to_per_block_pay;
-         {
-            token::issue_action issue_act{ token_account, { {get_self(), active_permission} } };
-            issue_act.send( get_self(), asset(new_tokens, core_symbol()), "issue tokens for producer pay and savings" );
-         }
-         {
-            token::transfer_action transfer_act{ token_account, { {get_self(), active_permission} } };
-            // transfer_act.send( get_self(), saving_account, asset(to_savings, core_symbol()), "unallocated inflation" );	// XEC Inflation
-            // transfer_act.send( get_self(), bpay_account, asset(to_per_block_pay, core_symbol()), "fund per-block bucket" );	// XEC Inflation
-            transfer_act.send( get_self(), vpay_account, asset(to_per_vote_pay, core_symbol()), "fund per-vote bucket" );
+         //int64_t to_producers     = (new_tokens * uint128_t(pay_factor_precision)) / _gstate4.inflation_pay_factor;
+         //int64_t to_savings       = new_tokens - to_producers;
+         //int64_t to_per_block_pay = (to_producers * uint128_t(pay_factor_precision)) / _gstate4.votepay_factor;
+         //int64_t to_per_vote_pay  = to_producers - to_per_block_pay;
+
+         if( new_tokens > 0 ) {
+            {
+               token::issue_action issue_act{ token_account, { {get_self(), active_permission} } };
+               issue_act.send( get_self(), asset(new_tokens, core_symbol()), "issue tokens for producer pay and savings" );
+            }
+            {
+               token::transfer_action transfer_act{ token_account, { {get_self(), active_permission} } };
+               // if( to_savings > 0 ) {        // XEC Inflation
+               //  transfer_act.send( get_self(), saving_account, asset(to_savings, core_symbol()), "unallocated inflation" );       // XEC Inflation
+               // }
+               // if( to_per_block_pay > 0 ) {  // XEC Inflation
+               //  transfer_act.send( get_self(), bpay_account, asset(to_per_block_pay, core_symbol()), "fund per-block bucket" );   // XEC Inflation
+               // }
+               if( to_per_vote_pay > 0 ) {
+                  transfer_act.send( get_self(), vpay_account, asset(to_per_vote_pay, core_symbol()), "fund per-vote bucket" );
+               }
+            }
          }
 
          _gstate.pervote_bucket          += to_per_vote_pay;
-         // _gstate.perblock_bucket         += to_per_block_pay;   //XEC Inflation
+         // _gstate.perblock_bucket         += to_per_block_pay;    //XEC Inflation
          _gstate.last_pervote_bucket_fill = ct;
       }
 
@@ -138,7 +146,7 @@ namespace eosiosystem {
       // XEC Inflation
       // int64_t producer_per_block_pay = 0;
       // if( _gstate.total_unpaid_blocks > 0 ) {
-         // producer_per_block_pay = (_gstate.perblock_bucket * prod.unpaid_blocks) / _gstate.total_unpaid_blocks;
+        // producer_per_block_pay = (_gstate.perblock_bucket * prod.unpaid_blocks) / _gstate.total_unpaid_blocks;
       // }
 
       double new_votepay_share = update_producer_votepay_share( prod2,
@@ -166,8 +174,8 @@ namespace eosiosystem {
       }
 
       _gstate.pervote_bucket      -= producer_per_vote_pay;
-      // _gstate.perblock_bucket     -= producer_per_block_pay;	// XEC Inflation
-      // _gstate.total_unpaid_blocks -= prod.unpaid_blocks;	// XEC Inflation
+      // _gstate.perblock_bucket     -= producer_per_block_pay;  // XEC Inflation
+      // _gstate.total_unpaid_blocks -= prod.unpaid_blocks;      // XEC Inflation
 
       update_total_votepay_share( ct, -new_votepay_share, (updated_after_threshold ? prod.total_votes : 0.0) );
 
@@ -183,7 +191,6 @@ namespace eosiosystem {
          transfer_act.send( bpay_account, owner, asset(producer_per_block_pay, core_symbol()), "producer block pay" );
       }
       */
-
       if ( producer_per_vote_pay > 0 ) {
          token::transfer_action transfer_act{ token_account, { {vpay_account, active_permission}, {owner, active_permission} } };
          transfer_act.send( vpay_account, owner, asset(producer_per_vote_pay, core_symbol()), "producer vote pay" );

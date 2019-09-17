@@ -536,6 +536,24 @@
             ]
         },
         {
+            "name": "eosio_global_state4",
+            "base": "",
+            "fields": [
+                {
+                    "name": "continuous_rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "inflation_pay_factor",
+                    "type": "int64"
+                },
+                {
+                    "name": "votepay_factor",
+                    "type": "int64"
+                }
+            ]
+        },
+        {
             "name": "exchange_state",
             "base": "",
             "fields": [
@@ -1284,6 +1302,24 @@
             ]
         },
         {
+            "name": "setinflation",
+            "base": "",
+            "fields": [
+                {
+                    "name": "annual_rate",
+                    "type": "int64"
+                },
+                {
+                    "name": "inflation_pay_factor",
+                    "type": "int64"
+                },
+                {
+                    "name": "votepay_factor",
+                    "type": "int64"
+                }
+            ]
+        },
+        {
             "name": "setparams",
             "base": "",
             "fields": [
@@ -1768,6 +1804,11 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Deploy Contract Code\nsummary: 'Deploy contract code on account {{nowrap account}}'\nicon: http://raw.githubusercontent.com/Europechain/Icons/master/account.png#3d55a2fc3a5c20b456f5657faf666bc25ffd06f4836c5e8256f741149b0b294f\n---\n\nDeploy compiled contract code to the account {{account}}."
         },
         {
+            "name": "setinflation",
+            "type": "setinflation",
+            "ricardian_contract": ""
+        },
+        {
             "name": "setparams",
             "type": "setparams",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Set System Parameters\nsummary: 'Set System Parameters'\nicon: http://raw.githubusercontent.com/Europechain/Icons/master/admin.png#9bf1cec664863bd6aaac0f814b235f8799fb02c850e9aa5da34e8a004bd6518e\n---\n\n{{$action.account}} sets system parameters to:\n{{to_json params}}"
@@ -1884,6 +1925,13 @@
         {
             "name": "global3",
             "type": "eosio_global_state3",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "global4",
+            "type": "eosio_global_state4",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

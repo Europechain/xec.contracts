@@ -9,10 +9,10 @@ namespace eosiosystem {
    using eosio::token;
 
    void system_contract::bidname( const name& bidder, const name& newname, const asset& bid ) {
-      require_auth( bidder );
 
       check (checkPermission(bidder, "namebids")==1, "You are not authorised to namebids");  // XEC Check Permissions
 
+      require_auth( bidder );
       check( newname.suffix() == newname, "you can only bid on top-level suffix" );
 
       check( (bool)newname, "the empty name is not a valid account name to bid on" );

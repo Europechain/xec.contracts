@@ -15,14 +15,6 @@ struct contracts {
    static std::vector<uint8_t> bios_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/eosio.bios/eosio.bios.wasm"); }
    static std::vector<char>    bios_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/eosio.bios/eosio.bios.abi"); }
 
-   static std::vector<uint8_t> eosio_assert_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../eosio.assert/eosio.assert.wasm"); }
-   static std::vector<char>    eosio_assert_abi() { return read_abi("${CMAKE_BINARY_DIR}/../eosio.assert/eosio.assert.abi"); }
-
-   static std::vector<char>    test_foo_abi() { return read_abi("${CMAKE_SOURCE_DIR}/test_contracts/foo.abi"); }
-   static std::vector<char>    test_bar_abi() { return read_abi("${CMAKE_SOURCE_DIR}/test_contracts/bar.abi"); }
-   static std::vector<char>    test_baz_abi() { return read_abi("${CMAKE_SOURCE_DIR}/test_contracts/baz.abi"); }
-
-
    struct util {
       static std::vector<uint8_t> reject_all_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/reject_all.wasm"); }
       static std::vector<uint8_t> exchange_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/exchange.wasm"); }

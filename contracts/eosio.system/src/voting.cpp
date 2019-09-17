@@ -25,8 +25,8 @@ namespace eosiosystem {
       check( producer_key != eosio::public_key(), "public key should not be the default value" );
       require_auth( producer );
 
-	  check (checkPermission(producer, "regprod")==1, "You are not authorised to register as producer");  // XEC Check Permissions
-	  
+      check (checkPermission(producer, "regprod")==1, "You are not authorised to register as producer");  // XEC Check Permissions
+
       auto prod = _producers.find( producer.value );
       const auto ct = current_time_point();
 
@@ -165,9 +165,9 @@ namespace eosiosystem {
 
    void system_contract::voteproducer( const name& voter_name, const name& proxy, const std::vector<name>& producers ) {
       require_auth( voter_name );
-	  
+
       check (checkPermission(voter_name, "vote")==1, "You are not authorised to Vote");  // XEC Check Permissions
-	  
+
       vote_stake_updater( voter_name );
       update_votes( voter_name, proxy, producers, true );
       auto rex_itr = _rexbalance.find( voter_name.value );
