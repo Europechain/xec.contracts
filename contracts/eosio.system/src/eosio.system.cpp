@@ -325,8 +325,6 @@ namespace eosiosystem {
 
       if( creator != get_self() ) {
 
-         check (system_contract::checkPermission(creator, "createacc")==1, "You are not authorised to create accounts");  // XEC Check Permissions
-
          uint64_t tmp = newact.value >> 4;
          bool has_dot = false;
 
@@ -334,7 +332,8 @@ namespace eosiosystem {
            has_dot |= !(tmp & 0x1f);
            tmp >>= 5;
          }
-         if( has_dot ) { // or is less than 12 characters
+         
+		 if( has_dot ) { // or is less than 12 characters
             auto suffix = newact.suffix();
             if( suffix == newact ) {
                name_bid_table bids(get_self(), get_self().value);
@@ -346,7 +345,9 @@ namespace eosiosystem {
             } else {
                check( creator == suffix, "only suffix may create this account" );
             }
-         }
+         } else {
+			check (system_contract::checkPermission(creator, "createacc")==1, "You are not authorised to create accounts");  // XEC Check Permissions
+		 }
       }
 
       user_resources_table  userres( get_self(), newact.value );
