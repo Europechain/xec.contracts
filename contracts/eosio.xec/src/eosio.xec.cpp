@@ -135,13 +135,13 @@ namespace eosio {
 		
 		if ( existing != perm.end() ) {
 			perm.modify( existing, _self, [&]( auto& p ){
-				if(permission == "createacc" && (existing->createacc != 4 || existing->createacc != 1) ) { p.createacc = 2; }
-				if(permission == "vote" && (existing->vote != 4 || existing->vote != 1) ) { p.vote = 2; }
-				if(permission == "regprod" && (existing->regprod != 4 || existing->regprod != 1) ) { p.regprod = 2; }
-				if(permission == "regproxy" && (existing->regproxy != 4 || existing->regproxy != 1) ) { p.regproxy = 2; }
-				if(permission == "setcontract" && (existing->setcontract != 4 || existing->setcontract != 1) ) { p.setcontract = 2; }
-				if(permission == "namebids" && (existing->namebids != 4 || existing->namebids != 1) ) { p.namebids = 2; }
-				if(permission == "rex" && (existing->rex != 4 || existing->rex != 1) ) { p.rex = 2; }
+				if(permission == "createacc" && existing->createacc != 4 && existing->createacc != 1 ) { p.createacc = 2; }
+				if(permission == "vote" && existing->vote != 4 && existing->vote != 1 ) { p.vote = 2; }
+				if(permission == "regprod" && existing->regprod != 4 && existing->regprod != 1 ) { p.regprod = 2; }
+				if(permission == "regproxy" && existing->regproxy != 4 && existing->regproxy != 1 ) { p.regproxy = 2; }
+				if(permission == "setcontract" && existing->setcontract != 4 && existing->setcontract != 1 ) { p.setcontract = 2; }
+				if(permission == "namebids" && existing->namebids != 4 && existing->namebids != 1 ) { p.namebids = 2; }
+				if(permission == "rex" && existing->rex != 4 && existing->rex != 1 ) { p.rex = 2; }
 			});
 		} else {
 			perm.emplace( _self, [&]( auto& p ){
