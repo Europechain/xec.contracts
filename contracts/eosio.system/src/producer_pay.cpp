@@ -21,8 +21,8 @@ namespace eosiosystem {
       // is eventually completely removed, at which point this line can be removed.
       _gstate2.last_block_num = timestamp;
 
-      /** until activated stake crosses this threshold no new rewards are paid */
-      if( _gstate.total_activated_stake < min_activated_stake )
+      /** until activation, no new rewards are paid */
+      if( _gstate.thresh_activated_stake_time == time_point() )
          return;
 
       if( _gstate.last_pervote_bucket_fill == time_point() )  /// start the presses
@@ -33,7 +33,7 @@ namespace eosiosystem {
        * At startup the initial producer may not be one that is registered / elected
        * and therefore there may be no producer object for them.
        */
-
+	   
       // XEC Inflation (Remove unpaid block calculation)
       /*
       auto prod = _producers.find( producer.value );
@@ -75,7 +75,7 @@ namespace eosiosystem {
       const auto& prod = _producers.get( owner.value );
       check( prod.active(), "producer does not have an active key" );
 
-      check( _gstate.total_activated_stake >= min_activated_stake,
+      check( _gstate.thresh_activated_stake_time != time_point(),
                     "cannot claim rewards until the chain is activated (at least 15% of all tokens participate in voting)" );
 
       const auto ct = current_time_point();
@@ -86,12 +86,15 @@ namespace eosiosystem {
       const auto usecs_since_last_fill = (ct - _gstate.last_pervote_bucket_fill).count();
 
       if( usecs_since_last_fill > 0 && _gstate.last_pervote_bucket_fill > time_point() ) {
-         int64_t new_tokens = (_gstate4.continuous_rate * double(token_supply.amount) * double(usecs_since_last_fill)) / double(useconds_per_year);
+         double additional_inflation = (_gstate4.continuous_rate * double(token_supply.amount) * double(usecs_since_last_fill)) / double(useconds_per_year);
+         check( additional_inflation <= double(std::numeric_limits<int64_t>::max() - ((1ll << 10) - 1)),
+                "overflow in calculating new tokens to be issued; inflation rate is too high" );
+         int64_t new_tokens = (additional_inflation < 0.0) ? 0 : static_cast<int64_t>(additional_inflation);
 
-         // XEC Inflation
+		 // XEC Inflation
          auto to_per_vote_pay  = new_tokens;
-
-         // XEC Inflation
+		 
+		 // XEC Inflation
          //int64_t to_producers     = (new_tokens * uint128_t(pay_factor_precision)) / _gstate4.inflation_pay_factor;
          //int64_t to_savings       = new_tokens - to_producers;
          //int64_t to_per_block_pay = (to_producers * uint128_t(pay_factor_precision)) / _gstate4.votepay_factor;
@@ -146,7 +149,7 @@ namespace eosiosystem {
       // XEC Inflation
       // int64_t producer_per_block_pay = 0;
       // if( _gstate.total_unpaid_blocks > 0 ) {
-        // producer_per_block_pay = (_gstate.perblock_bucket * prod.unpaid_blocks) / _gstate.total_unpaid_blocks;
+      //   producer_per_block_pay = (_gstate.perblock_bucket * prod.unpaid_blocks) / _gstate.total_unpaid_blocks;
       // }
 
       double new_votepay_share = update_producer_votepay_share( prod2,

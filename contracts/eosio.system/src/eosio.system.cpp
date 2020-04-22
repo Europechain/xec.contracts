@@ -26,11 +26,12 @@ namespace eosiosystem {
     _global4(get_self(), get_self().value),
     _rammarket(get_self(), get_self().value),
     _rexpool(get_self(), get_self().value),
+    _rexretpool(get_self(), get_self().value),
+    _rexretbuckets(get_self(), get_self().value),
     _rexfunds(get_self(), get_self().value),
     _rexbalance(get_self(), get_self().value),
     _rexorders(get_self(), get_self().value)
    {
-      //print( "construct system\n" );
       _gstate  = _global.exists() ? _global.get() : get_default_parameters();
       _gstate2 = _global2.exists() ? _global2.get() : eosio_global_state2{};
       _gstate3 = _global3.exists() ? _global3.get() : eosio_global_state3{};
@@ -324,7 +325,6 @@ namespace eosiosystem {
                             ignore<authority> active ) {
 
       if( creator != get_self() ) {
-
          uint64_t tmp = newact.value >> 4;
          bool has_dot = false;
 
@@ -332,8 +332,7 @@ namespace eosiosystem {
            has_dot |= !(tmp & 0x1f);
            tmp >>= 5;
          }
-         
-		 if( has_dot ) { // or is less than 12 characters
+         if( has_dot ) { // or is less than 12 characters
             auto suffix = newact.suffix();
             if( suffix == newact ) {
                name_bid_table bids(get_self(), get_self().value);
@@ -379,6 +378,7 @@ namespace eosiosystem {
       }
    }
 
+
    /* ----------------------------------- */
    /* ------------ XEC CODE ------------- */
 
@@ -389,7 +389,7 @@ namespace eosiosystem {
   /*-------------------------------------*/
 
 
-   void system_contract::init( unsigned_int version, const symbol& core ) {
+  void system_contract::init( unsigned_int version, const symbol& core ) {
       require_auth( get_self() );
       check( version.value == 0, "unsupported version for init action" );
 
